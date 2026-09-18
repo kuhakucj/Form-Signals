@@ -1,0 +1,1 @@
+{"name":"form-signal","version":"1.0.0","private":true,"type":"module","scripts":{"build":"esbuild src/app.js --bundle --minify --outfile=dist/app.js","dev":"python3 -m http.server 5173 --directory dist"},"dependencies":{"three":"0.180.0"},"devDependencies":{"esbuild":"0.25.9"}}
