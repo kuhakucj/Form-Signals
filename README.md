@@ -1,5 +1,7 @@
 # Form / Signal
 
+[Open the live studio](https://kuhakucj.github.io/Form-Signals/)
+
 A browser-based 3D visual playground with ASCII, pixel and blob-tracking effects, colored Perlin noise, editable typography and a node-style workspace.
 
 ## Run locally
@@ -20,7 +22,7 @@ Open http://localhost:5173. Rebuild after changing `src/app.js`.
 - `dist/`: ready-to-serve static website and bundled JavaScript.
 - `package.json` / `package-lock.json`: dependencies and build commands.
 
-Serve `dist/` from your web host's root. This repository does not automatically deploy a website.
+Serve `dist/` from your web host's root. Updates to main automatically publish dist/ to GitHub Pages.
 
 ## Features
 
