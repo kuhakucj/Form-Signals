@@ -190,7 +190,7 @@ try{renderer=new THREE.WebGLRenderer({antialias:false,alpha:true,preserveDrawing
 
 // A fixed, inspectable processing chain. Node placement does not change routing.
 const nodes=[
- {id:'source',name:'geometry1',type:'SOURCE',color:'#7baf91',help:'Choose or import a mesh. Drag in the viewer to orbit.'},
+ {id:'source',name:'geometry1',type:'SOURCE',color:'#7baf91',help:'Choose or import a mesh. Adjust its X, Y, Z position and scale below; drag in the viewer to orbit.'},
  {id:'style',name:'style1',type:'EFFECT',color:'#929bce',help:'Convert the rendered form into characters, pixels, or tracked regions. Bypass to view the original shaded mesh.'},
  {id:'color',name:'color1',type:'COLOR',color:'#bd91bd',help:'Map brightness to a color palette. Bypass for grayscale. Color mapping applies while style1 is enabled.'},
  {id:'noise',name:'perlin1',type:'NOISE',color:'#929bce',help:'Layer coherent Perlin noise over the image. Motion follows the viewer’s play/pause control.'},
@@ -200,6 +200,16 @@ const nodes=[
 const inspector=$('.controls-scroll'),panels={};
 const sections=$$('.controls-scroll > .control-section');
 [panels.source,panels.style,panels.color,panels.adjustments]=sections;
+// Transform the normalized model as a whole, independent of orbit and animation.
+const objectTransform={x:0,y:0,z:0,scale:1};
+panels.source.insertAdjacentHTML('beforeend','<div class="toggle-row"><label for="show-object">Show 3D object</label><input id="show-object" class="switch" type="checkbox" checked></div>');
+$('#show-object').onchange=e=>{if(root)root.visible=e.target.checked;tracked=[]};
+
+panels.source.insertAdjacentHTML('beforeend',`<div class="noise-controls"><div class="section-label"><h3>3D POSITION & SCALE</h3></div>${['x','y','z','scale'].map(key=>`<label for="object-${key}">${key==='scale'?'Scale':key.toUpperCase()+' position'} <output id="object-${key}-value">${key==='scale'?'1.00×':'0.00'}</output></label><input id="object-${key}" type="range" min="${key==='scale'?'.1':'-4'}" max="${key==='scale'?'3':'4'}" step=".01" value="${objectTransform[key]}">`).join('')}<button id="reset-transform" class="export-button text-export">Reset position & scale ↺</button><p class="helper">X: left / right · Y: down / up · Z: depth. Applies to the object and all image and video exports.</p></div>`);
+function applyObjectTransform(){if(root){root.position.set(objectTransform.x,objectTransform.y,objectTransform.z);root.scale.setScalar(objectTransform.scale)}tracked=[];for(const key of ['x','y','z','scale']){$('#object-'+key).value=objectTransform[key];$('#object-'+key+'-value').textContent=objectTransform[key].toFixed(2)+(key==='scale'?'×':'')}}
+for(const key of ['x','y','z','scale'])$('#object-'+key).oninput=e=>{objectTransform[key]=+e.target.value;applyObjectTransform()};
+$('#reset-transform').onclick=()=>{Object.assign(objectTransform,{x:0,y:0,z:0,scale:1});applyObjectTransform()};
+
 function panel(id,title){const el=document.createElement('section');el.className='control-section';el.innerHTML=`<div class="section-label"><h3>${title}</h3></div>`;inspector.append(el);panels[id]=el;return el}
 function moveRange(id,target){target.append($(`label[for="${id}"]`),$('#'+id))}
 moveRange('density',panels.style);moveRange('contrast',panels.style);panels.style.append($('#threshold-control'),$('#reset'));
