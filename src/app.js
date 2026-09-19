@@ -219,7 +219,7 @@ for(const [id,key] of [['noise-low','noiseLow'],['noise-high','noiseHigh']])$('#
 $('#noise-color-demo').onclick=()=>{state.noiseLow='#180745';state.noiseHigh='#ff287e';state.noiseBlend='source-over';state.grain=60;$('#noise-low').value=state.noiseLow;$('#noise-high').value=state.noiseHigh;$('#noise-low-value').textContent=state.noiseLow.toUpperCase();$('#noise-high-value').textContent=state.noiseHigh.toUpperCase();$('#noise-blend').value=state.noiseBlend;noiseWidth=0;updateRanges()};
 
 noisePanel.insertAdjacentHTML('beforeend','<div class="noise-controls"><label for="noise-scale">Scale <output id="noise-scale-value">115</output></label><input id="noise-scale" type="range" min="25" max="350" value="115"><label for="noise-speed">Motion <output id="noise-speed-value">0.0</output></label><input id="noise-speed" type="range" min="0" max="3" step="0.1" value="0"><label for="noise-blend">Blend</label><select id="noise-blend"><option value="source-over">Normal</option><option value="screen" selected>Screen</option><option value="multiply">Multiply</option><option value="overlay">Overlay</option><option value="soft-light">Soft light</option></select></div>');
-const typePanel=panel('type','POSTER LETTERING');typePanel.append($('.poster-row'),$('#poster-text'));
+const typePanel=panel('type','POSTER LETTERING');typePanel.append($('#poster').closest('.poster-row'),$('#poster-text'));
 typePanel.insertAdjacentHTML('beforeend','<div class="noise-controls"><label for="text-font">Font</label><select id="text-font"><option value="google" selected>Google Sans</option><option value="sans">Sans serif · Space Grotesk</option><option value="slab">Slab serif · Roboto Slab</option></select></div>');
 $('#text-font').onchange=async e=>{state.textFont=e.target.value;if(['slab','google'].includes(state.textFont)){try{await document.fonts.load(state.textFont==='google'?'500 48px "Google Sans"':'500 48px "Roboto Slab"')}catch{toast('Font could not load. Using the available fallback font.')}}};
 
@@ -245,7 +245,7 @@ $('#use-gradient').onclick=()=>{setFinish('gradient');gradientStrip()};
 $('#gradient-map').onchange=e=>{state.gradientMap=e.target.value;setFinish('gradient');gradientStrip()};
 $('#gradient-speed').oninput=e=>{state.gradientSpeed=+e.target.value;$('#gradient-speed-value').textContent=state.gradientSpeed.toFixed(1);noiseFill(e.target);setFinish('gradient');gradientStrip()};gradientStrip();
 
-const outPanel=panel('output','OUTPUT');outPanel.insertAdjacentHTML('beforeend','<p class="node-description">1080 × 1080 PNG image. Includes the enabled effects, Perlin overlay, and lettering.</p>');outPanel.append($('.toggle-row'));
+const outPanel=panel('output','OUTPUT');outPanel.insertAdjacentHTML('beforeend','<p class="node-description">1080 × 1080 PNG image. Includes the enabled effects, Perlin overlay, and lettering.</p>');outPanel.append($('#rotate').closest('.toggle-row'));
 outPanel.insertAdjacentHTML('beforeend','<div class="text-color-row"><label for="background-color">Background color</label><input type="color" id="background-color" value="#070708"><output id="background-value">#070708</output></div>');
 $('#background-color').oninput=e=>{state.background=e.target.value;$('#background-value').textContent=state.background.toUpperCase();const c=rgb(state.background);state.invert=(c[0]*.2126+c[1]*.7152+c[2]*.0722)>150;$('#invert').checked=state.invert;stage.classList.toggle('light',state.invert)};
 
