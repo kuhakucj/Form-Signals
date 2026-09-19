@@ -374,3 +374,10 @@ $('#text-outline').onchange=e=>state.textOutline=e.target.checked;
 $('#outline-color').oninput=e=>state.outlineColor=e.target.value;
 noiseFill($('#outline-width'));
 $('#outline-width').oninput=e=>{state.outlineWidth=+e.target.value;$('#outline-width-value').textContent=state.outlineWidth+' px';noiseFill(e.target)};
+
+// Keep quick visibility controls and the text operator in sync.
+panels.source.insertAdjacentHTML('afterbegin','<div class="toggle-row"><label for="show-text">Show text</label><input id="show-text" class="switch" type="checkbox" checked></div>');
+function syncTextVisibility(){ $('#show-text').checked=state.poster&&enabled.type; }
+$('#show-text').onchange=e=>{state.poster=e.target.checked;enabled.type=e.target.checked;$('#poster').checked=e.target.checked;$('#poster-text').disabled=!e.target.checked;const node=nodes.find(n=>n.id==='type');node.element.querySelector('input').checked=e.target.checked;node.element.classList.toggle('bypassed',!e.target.checked)};
+$('#poster').addEventListener('change',syncTextVisibility);
+nodes.find(n=>n.id==='type').element.querySelector('input').addEventListener('change',syncTextVisibility);
