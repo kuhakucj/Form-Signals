@@ -202,7 +202,7 @@ const sections=$$('.controls-scroll > .control-section');
 [panels.source,panels.style,panels.color,panels.adjustments]=sections;
 // Transform the normalized model as a whole, independent of orbit and animation.
 const objectTransform={x:0,y:0,z:0,scale:1};
-panels.source.insertAdjacentHTML('beforeend','<div class="toggle-row"><label for="show-object">Show 3D object</label><input id="show-object" class="switch" type="checkbox" checked></div>');
+panels.source.insertAdjacentHTML('beforeend','<div class="poster-row"><label for="show-object">Show 3D object</label><input id="show-object" class="switch" type="checkbox" checked></div>');
 $('#show-object').onchange=e=>{if(root)root.visible=e.target.checked;tracked=[]};
 
 panels.source.insertAdjacentHTML('beforeend',`<div class="noise-controls"><div class="section-label"><h3>3D POSITION & SCALE</h3></div>${['x','y','z','scale'].map(key=>`<label for="object-${key}">${key==='scale'?'Scale':key.toUpperCase()+' position'} <output id="object-${key}-value">${key==='scale'?'1.00×':'0.00'}</output></label><input id="object-${key}" type="range" min="${key==='scale'?'.1':'-4'}" max="${key==='scale'?'3':'4'}" step=".01" value="${objectTransform[key]}">`).join('')}<button id="reset-transform" class="export-button text-export">Reset position & scale ↺</button><p class="helper">X: left / right · Y: down / up · Z: depth. Applies to the object and all image and video exports.</p></div>`);
