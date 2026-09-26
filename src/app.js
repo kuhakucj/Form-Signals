@@ -7,8 +7,8 @@ import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const canvas=$('#output'),stage=$('#stage'),ctx=canvas.getContext('2d');
 let loopCapture=null,videoUrl=null;
-let exportSize=1080;
-function exportCanvas(source){const output=document.createElement('canvas');output.width=exportSize;output.height=exportSize;const context=output.getContext('2d');context.imageSmoothingEnabled=true;context.imageSmoothingQuality='high';context.drawImage(source,0,0,exportSize,exportSize);return output}
+let exportSize=1080,exportHeight=1080;
+function exportCanvas(source){const output=document.createElement('canvas');output.width=exportSize;output.height=exportHeight;const context=output.getContext('2d');context.imageSmoothingEnabled=true;context.imageSmoothingQuality='high';context.drawImage(source,0,0,exportSize,exportHeight);return output}
 
 const enabled={style:true,color:true,noise:true,type:true};
 const state={textOutline:true,outlineColor:'#080808',outlineWidth:2,innerShadow:false,shadowColor:'#000000',shadowStrength:65,shadowSoftness:18,shadowX:10,shadowY:10,noiseLow:'#070708',noiseHigh:'#ffffff',textFont:'google',background:'#070708',noiseWarp:1.5,noiseSwirl:0,noiseOctaves:4,noiseRoughness:.5,gradientStops:['#ff248f','#6236ff','#00e7ed'],gradientMap:'lighting',gradientSpeed:0,textColor:'#244dff',transparent:false,noiseScale:115,noiseSpeed:0,noiseBlend:'screen',mode:'ascii',finish:'cmyk',poster:true,posterText:'COMMON GROUND',density:80,contrast:1.4,grain:12,threshold:72,color:'#e9ff57',rotate:!matchMedia('(prefers-reduced-motion: reduce)').matches,invert:false};
@@ -20,7 +20,8 @@ function dispose(object){object?.traverse(o=>{o.geometry?.dispose();if(o.materia
 function setModel(object,name,imported=false){if(model){root.remove(model);dispose(model)}model=object;model.updateMatrixWorld(true);const box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3());const scale=3.3/Math.max(size.x,size.y,size.z);model.scale.multiplyScalar(scale);model.updateMatrixWorld(true);const center=new THREE.Box3().setFromObject(model).getCenter(new THREE.Vector3());model.position.sub(center);root.add(model);root.rotation.set(.2,0,.1);rotation=0;tracked=[];nextId=1;let count=0;model.traverse(o=>{if(o.isMesh){count+=o.geometry.attributes.position?.count||0;o.material=material}});$('#vertices').textContent=count.toLocaleString();$('#object-caption').textContent=name.toUpperCase();$('#source-tag').textContent=imported?'IMPORTED':'BUILT-IN';resetCamera()}
 function chooseObject(name){let geometry;if(name==='knot')geometry=new THREE.TorusKnotGeometry(1,.36,220,36,2,3);if(name==='torus')geometry=new THREE.TorusGeometry(1,.4,48,120);if(name==='cube')geometry=new THREE.BoxGeometry(1.8,1.8,1.8,20,20,20);if(name==='sphere'){geometry=new THREE.SphereGeometry(1.25,96,64);const p=geometry.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i);const f=1+.1*Math.sin(x*5)*Math.cos(y*4)*Math.sin(z*5);p.setXYZ(i,x*f,y*f,z*f)}geometry.computeVertexNormals()}setModel(new THREE.Mesh(geometry,material),{knot:'Torus knot',torus:'Soft ring',sphere:'Distorted orb',cube:'Cube'}[name]);$$('[data-object]').forEach(b=>b.classList.toggle('active',b.dataset.object===name));$('#file-hint').textContent='GLB, GLTF, OBJ or STL · up to 25 MB'}
 function resetCamera(){if(!camera)return;camera.position.set(0,.2,6.5);orbit.target.set(0,0,0);orbit.update()}
-function resize(){if(loopCapture)return;const box=stage.getBoundingClientRect();const side=Math.max(1,Math.floor(Math.min(box.width,box.height)));stage.style.setProperty('--preview-size',side+'px');width=1080;height=1080;if(canvas.width!==1080||canvas.height!==1080){canvas.width=1080;canvas.height=1080}if(camera){camera.aspect=1;camera.updateProjectionMatrix()}if($('#shadow-handle'))updateShadowHandle()}
+function resize(){if(loopCapture)return;const box=stage.getBoundingClientRect(),aspect=exportSize/exportHeight;const previewWidth=Math.max(1,Math.min(box.width,box.height*aspect));stage.style.setProperty('--preview-size',previewWidth+'px');stage.style.setProperty('--preview-height',(previewWidth/aspect)+'px');width=1080;height=Math.round(1080/aspect);if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height}if(camera){camera.aspect=aspect;camera.updateProjectionMatrix()}$('#resolution').textContent=exportSize+' × '+exportHeight;if($('#shadow-handle'))updateShadowHandle()}
+
 
 function setMode(mode){state.mode=mode;tracked=[];$$('[data-mode]').forEach(b=>{const active=b.dataset.mode===mode;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active)});$('#mode-label').textContent=mode==='blob'?'BLOB TRACKING':mode.toUpperCase();$('#mode-description').textContent={ascii:'Light and shadow, translated into characters.',blob:'Bright regions, tracked through motion.',pixel:'A little less resolution. A lot more character.'}[mode];$('#threshold-control').hidden=mode!=='blob'}
 function setRotation(value){state.rotate=value;$('#rotate').checked=value;$('#pause').innerHTML=value?'Ⅱ <span>PAUSE</span>':'▷ <span>PLAY</span>';$('#pause').setAttribute('aria-label',value?'Pause rotation':'Resume rotation')}
@@ -131,7 +132,7 @@ function render(time){
   if(!loopCapture)orbit.update();
   const cell=state.mode==='pixel'?Math.round(20-state.density*.15):Math.round(14-state.density*.095);
   const cols=enabled.style?Math.max(20,Math.floor(width/cell)):Math.min(width,1024),rows=enabled.style?Math.max(20,Math.floor(height/(state.mode==='ascii'?cell*1.4:cell))):Math.max(1,Math.round(cols*height/width));
-  if(sample.width!==cols||sample.height!==rows){sample.width=cols;sample.height=rows;renderer.setSize(cols,rows,false);$('#resolution').textContent='1080 × 1080'}
+  if(sample.width!==cols||sample.height!==rows){sample.width=cols;sample.height=rows;renderer.setSize(cols,rows,false);$('#resolution').textContent=exportSize+' × '+exportHeight}
   renderer.render(scene,camera);sc.clearRect(0,0,cols,rows);sc.drawImage(renderer.domElement,0,0,cols,rows);
   const data=sc.getImageData(0,0,cols,rows).data;
   ctx.clearRect(0,0,width,height);
@@ -325,7 +326,7 @@ $('#export-video').onclick=async()=>{
  try{
   await document.fonts.ready;
   const format=videoFormats.find(f=>f.mime===$('#video-format').value);if(!format)throw new Error('No supported video format is available.');
-  const recordingCanvas=document.createElement('canvas');recordingCanvas.width=exportSize;recordingCanvas.height=exportSize;
+  const recordingCanvas=document.createElement('canvas');recordingCanvas.width=exportSize;recordingCanvas.height=exportHeight;
   const recordingContext=recordingCanvas.getContext('2d');recordingContext.fillStyle=state.background;recordingContext.fillRect(0,0,recordingCanvas.width,recordingCanvas.height);recordingContext.drawImage(canvas,0,0,recordingCanvas.width,recordingCanvas.height);
   const stream=recordingCanvas.captureStream(30);
   let recorder;try{recorder=new MediaRecorder(stream,{mimeType:format.mime,videoBitsPerSecond:8000000})}catch(error){stream.getTracks().forEach(t=>t.stop());throw error}
@@ -385,5 +386,5 @@ $('#show-text').onchange=e=>{state.poster=e.target.checked;enabled.type=e.target
 $('#poster').addEventListener('change',syncTextVisibility);
 nodes.find(n=>n.id==='type').element.querySelector('input').addEventListener('change',syncTextVisibility);
 
-$('.export-area').insertAdjacentHTML('afterbegin','<div class="noise-controls"><label for="export-size">Export size</label><select id="export-size"><option value="1080">1080 × 1080 px</option><option value="800">800 × 800 px</option><option value="320">320 × 320 px</option></select></div>');
-$('#export-size').onchange=e=>{exportSize=+e.target.value;toast(`Export size: ${exportSize} × ${exportSize} · images, text and video`)};
+$('.export-area').insertAdjacentHTML('afterbegin','<div class="noise-controls"><label for="export-size">Export size</label><select id="export-size"><option value="1080">1080 × 1080 px</option><option value="800x320">800 × 320 px · Wide</option></select></div>');
+$('#export-size').onchange=e=>{[exportSize,exportHeight]=e.target.value==='800x320'?[800,320]:[1080,1080];resize();toast(`Export size: ${exportSize} × ${exportHeight} · images, text and video`)};
