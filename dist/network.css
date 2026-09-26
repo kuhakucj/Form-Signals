@@ -13,4 +13,4 @@
 
 #shadow-positioner{position:absolute;inset:0;pointer-events:none;z-index:4}#shadow-positioner[hidden]{display:none}.shadow-origin{position:absolute;left:50%;top:50%;color:#fff;font:20px monospace;transform:translate(-50%,-50%);text-shadow:0 1px 3px #000}#shadow-handle{position:absolute;width:38px;height:38px;transform:translate(-50%,-50%);border:1px solid #ecf4ff;border-radius:50%;background:#253b58dc;color:white;font-size:28px;line-height:30px;cursor:move;pointer-events:auto;touch-action:none;box-shadow:0 0 0 3px #0005}.shadow-placement-hint{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);background:#1c2a3bde;color:#fff;padding:7px 10px;white-space:nowrap;font:10px var(--mono)}.recording #shadow-positioner{display:none}
 
-.stage canvas#output{inset:auto;left:50%;top:50%;transform:translate(-50%,-50%);width:var(--preview-size,100%);height:var(--preview-size,100%);box-shadow:0 0 0 1px #7d899b33}
+.stage canvas#output{inset:auto;left:50%;top:50%;transform:translate(-50%,-50%);width:var(--preview-size,100%);height:var(--preview-height,var(--preview-size,100%));box-shadow:0 0 0 1px #7d899b33}
